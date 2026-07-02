@@ -1,0 +1,17 @@
+{
+  "title": "Fixture parser fix",
+  "summary": "Fixed JSON parsing for summaries with artifact arrays.",
+  "files": [
+    "src/index.js",
+    "test/index.test.js"
+  ],
+  "verification": [
+    "npm test passed"
+  ],
+  "artifacts": [
+    "fixtures/change-summary.json"
+  ],
+  "risks": [
+    "None known"
+  ]
+}
