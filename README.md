@@ -1,0 +1,24 @@
+# repo-changebrief-skill
+
+Local-first agent skill for turning repository change summaries into release notes, demo outlines, and post drafts that stay tied to verification evidence.
+
+## Quickstart
+
+```bash
+npm install
+npm run smoke
+node src/cli.js fixtures/change-summary.md --format markdown
+node src/cli.js fixtures/change-summary.json --format json
+```
+
+## Input Shape
+
+Markdown inputs can include `Summary`, `Changed Files`, `Verification`, `Artifacts`, `Risks`, and `Audience` sections. JSON inputs use the same field names in camel case.
+
+## Limitations
+
+The tool cannot know whether a claim is true beyond the provided summary. Missing verification and artifact evidence is surfaced as warnings.
+
+## Safety Notes
+
+Output is a draft. Human approval is required before public release notes, social posts, or launch materials are published.
