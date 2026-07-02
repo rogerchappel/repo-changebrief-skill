@@ -30,8 +30,9 @@ export function parseSummary(text, source = 'inline') {
 }
 
 export function classifyChange(summary) {
-  const haystack = [summary.title, summary.summary, ...summary.files].join(' ').toLowerCase();
+  const haystack = [summary.title, summary.summary, ...summary.files.map(file => file.replace(/\.[^.]+$/, ''))].join(' ').toLowerCase();
   const scores = Object.fromEntries(Object.entries(TYPES).map(([type, words]) => [type, words.filter(word => haystack.includes(word)).length]));
+  if (/\bfix(ed|es|ing)?\b|\bbug\b|\bregression\b/i.test(`${summary.title} ${summary.summary}`)) scores.fix += 2;
   const ranked = Object.entries(scores).sort((a, b) => b[1] - a[1]);
   if (ranked[0][1] === 0) return 'mixed';
   return ranked.filter(([, score]) => score === ranked[0][1]).length > 1 ? 'mixed' : ranked[0][0];
