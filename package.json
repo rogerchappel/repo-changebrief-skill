@@ -1,0 +1,35 @@
+{
+  "name": "repo-changebrief-skill",
+  "version": "0.1.0",
+  "description": "Turn repository change summaries into evidence-backed launch content for agents.",
+  "type": "module",
+  "bin": {
+    "repo-changebrief-skill": "./src/cli.js"
+  },
+  "scripts": {
+    "test": "node --test",
+    "check": "node --check src/index.js && node --check src/cli.js",
+    "smoke": "node src/cli.js fixtures/change-summary.md --format markdown",
+    "build": "npm run check && npm test"
+  },
+  "keywords": [
+    "agent",
+    "skill",
+    "release-notes",
+    "repo-to-content",
+    "cli"
+  ],
+  "author": "Roger Chappel",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "files": [
+    "src",
+    "docs",
+    "fixtures",
+    "examples",
+    "SKILL.md",
+    "README.md"
+  ]
+}
