@@ -22,3 +22,13 @@ The tool cannot know whether a claim is true beyond the provided summary. Missin
 ## Safety Notes
 
 Output is a draft. Human approval is required before public release notes, social posts, or launch materials are published.
+
+## Local Verification
+
+```sh
+npm run check
+npm test
+npm run smoke
+npm run package:smoke
+npm run release:check
+```
