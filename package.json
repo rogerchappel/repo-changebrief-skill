@@ -12,7 +12,7 @@
     "smoke": "node src/cli.js fixtures/change-summary.md --format markdown",
     "build": "npm run check && npm test",
     "lint": "npm run check",
-    "package:smoke": "npm pack --dry-run",
+    "package:smoke": "node scripts/package-smoke.js",
     "release:check": "npm run check && npm test && npm run smoke && npm run package:smoke"
   },
   "keywords": [
@@ -33,7 +33,11 @@
     "fixtures",
     "examples",
     "SKILL.md",
-    "README.md"
+    "README.md",
+    "CHANGELOG.md",
+    "CONTRIBUTING.md",
+    "LICENSE",
+    "SECURITY.md"
   ],
   "repository": {
     "type": "git",
