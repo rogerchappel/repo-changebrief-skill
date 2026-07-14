@@ -36,4 +36,5 @@ npm run release:check
 `npm run release:check` is the PR and release gate. It runs static checks, the
 test suite, the fixture-backed CLI smoke, and a structured package smoke that
 verifies the tarball includes the CLI, library, fixtures, example brief,
-release notes, security policy, and license.
+release notes, security policy, code of conduct, and license without bundling
+the test suite.
