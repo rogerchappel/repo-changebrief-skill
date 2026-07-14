@@ -37,7 +37,8 @@
     "CHANGELOG.md",
     "CONTRIBUTING.md",
     "LICENSE",
-    "SECURITY.md"
+    "SECURITY.md",
+    "CODE_OF_CONDUCT.md"
   ],
   "repository": {
     "type": "git",
