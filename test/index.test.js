@@ -1,6 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
+import { readFileSync } from 'node:fs';
 import { buildBrief, classifyChange, loadSummary, parseSummary, renderMarkdown } from '../src/index.js';
+const packageJson = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
 
 test('parses markdown change summaries', () => {
   const summary = loadSummary('fixtures/change-summary.md');
@@ -28,4 +31,11 @@ test('renders markdown report', () => {
 
 test('classifies docs changes', () => {
   assert.equal(classifyChange({ title: 'README docs update', summary: '', files: ['README.md'] }), 'docs');
+});
+
+test('cli reports package version', () => {
+  const version = execFileSync(process.execPath, ['src/cli.js', '--version'], {
+    encoding: 'utf8',
+  }).trim();
+  assert.equal(version, packageJson.version);
 });

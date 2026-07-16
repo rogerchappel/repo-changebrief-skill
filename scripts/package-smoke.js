@@ -1,4 +1,5 @@
 import { execFileSync } from 'node:child_process';
+import { readFileSync } from 'node:fs';
 
 const output = execFileSync('npm', ['pack', '--dry-run', '--json'], { encoding: 'utf8' });
 const [pack] = JSON.parse(output);
@@ -30,6 +31,13 @@ if (missing.length > 0 || unexpected.length > 0) {
   if (unexpected.length > 0) {
     console.error('Package smoke unexpectedly included: ' + unexpected.join(', '));
   }
+  process.exit(1);
+}
+
+const packageJson = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
+const version = execFileSync(process.execPath, ['src/cli.js', '--version'], { encoding: 'utf8' }).trim();
+if (version !== packageJson.version) {
+  console.error('Package smoke failed; CLI --version did not match package.json');
   process.exit(1);
 }
 
