@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { buildBrief, classifyChange, loadSummary, parseSummary, renderMarkdown } from '../src/index.js';
 const packageJson = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
@@ -50,3 +50,35 @@ test('cli reports package version', () => {
   }).trim();
   assert.equal(version, packageJson.version);
 });
+
+test('cli accepts --format before the input file', () => {
+  const result = runCli('--format', 'json', 'fixtures/change-summary.md');
+  assert.equal(result.status, 0);
+  assert.equal(JSON.parse(result.stdout).title, 'Release Gate README and CLI refresh');
+});
+
+test('cli help exits successfully without an input file', () => {
+  const result = runCli('--help');
+  assert.equal(result.status, 0);
+  assert.match(result.stdout, /^Usage:/);
+  assert.equal(result.stderr, '');
+});
+
+test('cli rejects invalid options and arguments with concise usage errors', () => {
+  for (const [args, message] of [
+    [['fixtures/change-summary.md', '--format'], 'missing value for --format'],
+    [['fixtures/change-summary.md', '--format', 'xml'], 'unsupported format "xml"'],
+    [['fixtures/change-summary.md', '--unknown'], 'unknown option "--unknown"'],
+    [['fixtures/change-summary.md', 'extra.md'], 'unexpected positional argument "extra.md"'],
+  ]) {
+    const result = runCli(...args);
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, new RegExp(message.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+    assert.match(result.stderr, /Usage:/);
+    assert.doesNotMatch(result.stderr, /\n\s+at /);
+  }
+});
+
+function runCli(...args) {
+  return spawnSync(process.execPath, ['src/cli.js', ...args], { encoding: 'utf8' });
+}
