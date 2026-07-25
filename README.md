@@ -9,11 +9,16 @@ npm install
 npm run smoke
 node src/cli.js fixtures/change-summary.md --format markdown
 node src/cli.js fixtures/change-summary.json --format json
+node src/cli.js --format json fixtures/change-summary.md
 ```
 
 ## Input Shape
 
-Markdown inputs can include `Summary`, `Changed Files`, `Verification`, `Artifacts`, `Risks`, and `Audience` sections. JSON inputs use the same field names in camel case.
+Markdown inputs can include `Summary`, `Changed Files`, `Verification`, `Artifacts`, `Risks`, and `Audience` sections. JSON inputs use the same field names in camel case. `source`, `title`, and `summary` must be strings; `files`, `verification`, `artifacts`, `risks`, and `audience` must be arrays of strings.
+
+The input file can appear before or after `--format`. Run `node src/cli.js --help`
+for usage. Unsupported formats, unknown options, and extra input files are
+rejected with a concise error.
 
 ## Limitations
 
