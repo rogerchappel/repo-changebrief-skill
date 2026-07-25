@@ -61,7 +61,22 @@ function splitSections(text) {
 }
 function collect(sections, names) { const out=[]; for (const [name, lines] of sections) if (names.some(n => name.includes(n))) out.push(...items(lines)); return unique(out); }
 function items(lines) { return lines.map(l => l.trim()).filter(Boolean).map(l => l.replace(/^[-*]\s+/, '').replace(/^\d+[.)]\s+/, '')).filter(l => l.length > 1); }
-function normalize(input, source) { return { source: input.source || source, title: input.title || basename(source), summary: input.summary || '', files: unique(input.files || []), verification: unique(input.verification || []), artifacts: unique(input.artifacts || []), risks: unique(input.risks || []), audience: unique(input.audience || []) }; }
+function normalize(input, source) {
+  if (!input || typeof input !== 'object' || Array.isArray(input)) {
+    throw new Error('invalid JSON input: expected an object');
+  }
+  for (const field of ['source', 'title', 'summary']) {
+    if (input[field] !== undefined && typeof input[field] !== 'string') {
+      throw new Error(`invalid JSON field "${field}": expected a string`);
+    }
+  }
+  for (const field of ['files', 'verification', 'artifacts', 'risks', 'audience']) {
+    if (input[field] !== undefined && (!Array.isArray(input[field]) || input[field].some(item => typeof item !== 'string'))) {
+      throw new Error(`invalid JSON field "${field}": expected an array of strings`);
+    }
+  }
+  return { source: input.source || source, title: input.title || basename(source), summary: input.summary || '', files: unique(input.files || []), verification: unique(input.verification || []), artifacts: unique(input.artifacts || []), risks: unique(input.risks || []), audience: unique(input.audience || []) };
+}
 function looksLikeFile(line) { return /[\w.-]+\/[\w./-]+|[\w.-]+\.(js|ts|md|json|yml|yaml|py|sh)$/i.test(line); }
 function unique(items) { return [...new Set(items.map(String).map(s => s.trim()).filter(Boolean))]; }
 function firstHeading(text) { return text.match(/^#\s+(.+)$/m)?.[1]?.trim(); }

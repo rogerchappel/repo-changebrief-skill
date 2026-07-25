@@ -18,6 +18,17 @@ test('parses json change summaries', () => {
   assert.equal(brief.warnings.length, 0);
 });
 
+test('rejects invalid json field shapes with a stable field-specific error', () => {
+  assert.throws(
+    () => parseSummary('{"title":"Update","files":"src/cli.js"}', 'summary.json'),
+    { message: 'invalid JSON field "files": expected an array of strings' },
+  );
+  assert.throws(
+    () => parseSummary('{"title":["Update"]}', 'summary.json'),
+    { message: 'invalid JSON field "title": expected a string' },
+  );
+});
+
 test('warns when evidence is missing', () => {
   const brief = buildBrief(parseSummary('# Tiny update\n\n## Summary\nChanged README only.'));
   assert.ok(brief.warnings.includes('missing verification evidence'));
