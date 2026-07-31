@@ -40,8 +40,40 @@ test('renders markdown report', () => {
   assert.match(output, /npm test passed/);
 });
 
-test('classifies docs changes', () => {
-  assert.equal(classifyChange({ title: 'README docs update', summary: '', files: ['README.md'] }), 'docs');
+test('classifies change signals as words and supported word forms', () => {
+  for (const [title, expected] of [
+    ['Add export support', 'feature'],
+    ['Added export support', 'feature'],
+    ['Tests for export support', 'test'],
+    ['Testing export support', 'test'],
+    ['Fix export handling', 'fix'],
+    ['Fixed export handling', 'fix'],
+    ['README docs update', 'docs'],
+  ]) {
+    assert.equal(classifyChange({ title, summary: '', files: [] }), expected, title);
+  }
+});
+
+test('does not classify keywords embedded in unrelated words', () => {
+  for (const title of [
+    'Address release wording',
+    'Contest results',
+    'Newest release notes',
+    'Assertion update',
+  ]) {
+    assert.equal(classifyChange({ title, summary: '', files: [] }), 'mixed', title);
+  }
+});
+
+test('classification is case-insensitive and ties resolve to mixed', () => {
+  assert.equal(classifyChange({ title: 'FIXED EXPORT HANDLING', summary: '', files: [] }), 'fix');
+  assert.equal(classifyChange({ title: 'Add tests', summary: '', files: [] }), 'mixed');
+});
+
+test('classifies signals in file paths without matching filename substrings', () => {
+  assert.equal(classifyChange({ title: 'Update content', summary: '', files: ['docs/README.md'] }), 'docs');
+  assert.equal(classifyChange({ title: 'Update content', summary: '', files: ['test/parser.test.js'] }), 'test');
+  assert.equal(classifyChange({ title: 'Update content', summary: '', files: ['src/contest.js'] }), 'mixed');
 });
 
 test('cli reports package version', () => {

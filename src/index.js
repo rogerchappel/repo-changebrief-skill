@@ -1,11 +1,11 @@
 import fs from 'node:fs';
 
 const TYPES = {
-  feature: ['add', 'new', 'implement', 'feature', 'enable'],
-  fix: ['fix', 'bug', 'repair', 'regression', 'correct'],
-  docs: ['docs', 'readme', 'guide', 'documentation'],
-  test: ['test', 'fixture', 'coverage', 'assert'],
-  chore: ['chore', 'cleanup', 'metadata', 'package']
+  feature: [/\badd(?:s|ed|ing)?\b/, /\bnew\b/, /\bimplement(?:s|ed|ing)?\b/, /\bfeatures?\b/, /\benable(?:s|d|ing)?\b/],
+  fix: [/\bfix(?:ed|es|ing)?\b/, /\bbugs?\b/, /\brepair(?:s|ed|ing)?\b/, /\bregressions?\b/, /\bcorrect(?:s|ed|ing)?\b/],
+  docs: [/\bdocs?\b/, /\breadme\b/, /\bguides?\b/, /\bdocumentation\b/],
+  test: [/\btest(?:s|ed|ing)?\b/, /\bfixtures?\b/, /\bcoverage\b/, /\bassert(?:s|ed|ing)?\b/],
+  chore: [/\bchores?\b/, /\bcleanup\b/, /\bmetadata\b/, /\bpackages?\b/]
 };
 
 export function loadSummary(path) {
@@ -31,7 +31,7 @@ export function parseSummary(text, source = 'inline') {
 
 export function classifyChange(summary) {
   const haystack = [summary.title, summary.summary, ...summary.files.map(file => file.replace(/\.[^.]+$/, ''))].join(' ').toLowerCase();
-  const scores = Object.fromEntries(Object.entries(TYPES).map(([type, words]) => [type, words.filter(word => haystack.includes(word)).length]));
+  const scores = Object.fromEntries(Object.entries(TYPES).map(([type, signals]) => [type, signals.filter(signal => signal.test(haystack)).length]));
   if (/\bfix(ed|es|ing)?\b|\bbug\b|\bregression\b/i.test(`${summary.title} ${summary.summary}`)) scores.fix += 2;
   const ranked = Object.entries(scores).sort((a, b) => b[1] - a[1]);
   if (ranked[0][1] === 0) return 'mixed';

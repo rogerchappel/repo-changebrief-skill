@@ -24,6 +24,15 @@ rejected with a concise error.
 
 The tool cannot know whether a claim is true beyond the provided summary. Missing verification and artifact evidence is surfaced as warnings.
 
+Change types are inferred deterministically from case-insensitive signals in the
+title, summary, and changed-file paths. Signals must be complete words; common
+documented forms such as `add`/`added`, `test`/`tests`/`testing`, and
+`fix`/`fixed` are supported. Each signal contributes once per type, fixes in
+the title or summary receive extra weight, and a highest-score tie (or no
+signals) produces `mixed`. This intentionally avoids substring guesses such as
+`add` in `address` or `test` in `contest`, but it cannot infer synonyms that are
+not in the built-in signal list.
+
 ## Safety Notes
 
 Output is a draft. Human approval is required before public release notes, social posts, or launch materials are published.
