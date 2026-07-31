@@ -59,7 +59,7 @@ test('does not classify keywords embedded in unrelated words', () => {
     'Address release wording',
     'Contest results',
     'Newest release notes',
-    'Package assertion update',
+    'Assertion update',
   ]) {
     assert.equal(classifyChange({ title, summary: '', files: [] }), 'mixed', title);
   }
