@@ -1,8 +1,13 @@
 import { execFileSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 
-const output = execFileSync('npm', ['pack', '--dry-run', '--json'], { encoding: 'utf8' });
-const [pack] = JSON.parse(output);
+const workspace = mkdtempSync(join(tmpdir(), 'repo-changebrief-package-smoke-'));
+
+try {
+  const output = execFileSync('npm', ['pack', '--json', '--pack-destination', workspace], { encoding: 'utf8' });
+  const [pack] = JSON.parse(output);
 const files = new Set(pack.files.map((file) => file.path));
 const required = [
   'src/cli.js',
@@ -35,10 +40,32 @@ if (missing.length > 0 || unexpected.length > 0) {
 }
 
 const packageJson = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
-const version = execFileSync(process.execPath, ['src/cli.js', '--version'], { encoding: 'utf8' }).trim();
+const tarball = join(workspace, pack.filename);
+execFileSync('npm', ['init', '--yes'], { cwd: workspace, stdio: 'ignore' });
+execFileSync('npm', ['install', '--ignore-scripts', '--no-audit', '--no-fund', tarball], {
+  cwd: workspace,
+  stdio: 'ignore',
+});
+const cli = join(workspace, 'node_modules', '.bin', 'repo-changebrief-skill');
+const version = execFileSync(cli, ['--version'], { encoding: 'utf8' }).trim();
 if (version !== packageJson.version) {
   console.error('Package smoke failed; CLI --version did not match package.json');
   process.exit(1);
 }
 
-console.log(`package smoke ok: ${pack.files.length} files`);
+const rendered = execFileSync(cli, [
+  join(workspace, 'node_modules', 'repo-changebrief-skill', 'fixtures', 'change-summary.md'),
+  '--format',
+  'json',
+], { encoding: 'utf8' });
+const brief = JSON.parse(rendered);
+if (brief.title !== 'Release Gate README and CLI refresh' || brief.type !== 'mixed') {
+  console.error('Package smoke failed; installed CLI conversion returned unexpected output');
+  process.exitCode = 1;
+} else {
+  console.log(`package smoke ok: ${pack.files.length} files; installed CLI verified`);
+}
+
+} finally {
+  rmSync(workspace, { recursive: true, force: true });
+}
