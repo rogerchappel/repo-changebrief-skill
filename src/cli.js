@@ -30,13 +30,16 @@ try {
 function parseArgs(values) {
   let file;
   let format = 'markdown';
+  let hasFormat = false;
   for (let index = 0; index < values.length; index += 1) {
     const value = values[index];
     if (value === '--format') {
+      if (hasFormat) throw new Error('duplicate option "--format"');
       const candidate = values[index + 1];
       if (!candidate || candidate.startsWith('-')) throw new Error('missing value for --format');
       if (!['markdown', 'json'].includes(candidate)) throw new Error(`unsupported format "${candidate}"`);
       format = candidate;
+      hasFormat = true;
       index += 1;
     } else if (value.startsWith('-')) {
       throw new Error(`unknown option "${value}"`);

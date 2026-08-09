@@ -89,6 +89,26 @@ test('cli accepts --format before the input file', () => {
   assert.equal(JSON.parse(result.stdout).title, 'Release Gate README and CLI refresh');
 });
 
+test('cli accepts --format after the input file', () => {
+  const result = runCli('fixtures/change-summary.md', '--format', 'json');
+  assert.equal(result.status, 0);
+  assert.equal(JSON.parse(result.stdout).title, 'Release Gate README and CLI refresh');
+});
+
+test('cli rejects duplicate --format options regardless of position', () => {
+  for (const args of [
+    ['--format', 'json', '--format', 'markdown', 'fixtures/change-summary.md'],
+    ['--format', 'json', 'fixtures/change-summary.md', '--format', 'markdown'],
+    ['fixtures/change-summary.md', '--format', 'json', '--format', 'markdown'],
+  ]) {
+    const result = runCli(...args);
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /Error: duplicate option "--format"/);
+    assert.match(result.stderr, /Usage:/);
+    assert.equal(result.stdout, '');
+  }
+});
+
 test('cli help exits successfully without an input file', () => {
   const result = runCli('--help');
   assert.equal(result.status, 0);
