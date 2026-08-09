@@ -16,9 +16,10 @@ node src/cli.js --format json fixtures/change-summary.md
 
 Markdown inputs can include `Summary`, `Changed Files`, `Verification`, `Artifacts`, `Risks`, and `Audience` sections. JSON inputs use the same field names in camel case. `source`, `title`, and `summary` must be strings; `files`, `verification`, `artifacts`, `risks`, and `audience` must be arrays of strings.
 
-The input file can appear before or after `--format`. Run `node src/cli.js --help`
-for usage. Unsupported formats, unknown options, and extra input files are
-rejected with a concise error.
+The input file can appear before or after a single `--format`. Run
+`node src/cli.js --help` for usage. Duplicate `--format` options, unsupported
+formats, unknown options, and extra input files are rejected with a concise
+non-zero error.
 
 ## Limitations
 
@@ -48,7 +49,7 @@ npm run release:check
 ```
 
 `npm run release:check` is the PR and release gate. It runs static checks, the
-test suite, the fixture-backed CLI smoke, and a structured package smoke that
-verifies the tarball includes the CLI, library, fixtures, example brief,
-release notes, security policy, code of conduct, and license without bundling
-the test suite.
+test suite, the fixture-backed checkout CLI smoke, and an installed-artifact
+gate. The package smoke verifies the tarball contents, installs that tarball in
+a disposable consumer, runs its linked CLI for `--version` and a fixture-backed
+conversion, and removes the consumer afterward.
