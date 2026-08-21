@@ -50,8 +50,12 @@ export function buildBrief(summary) {
 }
 
 export function renderMarkdown(brief) {
-  const list = (items, empty='- None listed') => items.length ? items.map(item => `- ${item}`).join('\n') : empty;
-  return `# ${brief.title}\n\nType: ${brief.type}\n\n## Release Notes\n\n${list(brief.releaseNotes)}\n\n## Demo Outline\n\n${list(brief.demo)}\n\n## Post Draft\n\n${brief.post}\n\n## Evidence\n\n${list(brief.evidence)}\n\n## Artifacts\n\n${list(brief.artifacts)}\n\n## Risks\n\n${list(brief.risks, '- None known')}\n\n## Warnings\n\n${list(brief.warnings, '- None')}\n`;
+  const list = (items, empty='- None listed') => items.length ? items.map(item => `- ${markdownInline(item)}`).join('\n') : empty;
+  return `# ${markdownInline(brief.title)}\n\nType: ${markdownInline(brief.type)}\n\n## Release Notes\n\n${list(brief.releaseNotes)}\n\n## Demo Outline\n\n${list(brief.demo)}\n\n## Post Draft\n\n${markdownInline(brief.post)}\n\n## Evidence\n\n${list(brief.evidence)}\n\n## Artifacts\n\n${list(brief.artifacts)}\n\n## Risks\n\n${list(brief.risks, '- None known')}\n\n## Warnings\n\n${list(brief.warnings, '- None')}\n`;
+}
+
+function markdownInline(value) {
+  return String(value).replace(/\r\n?|\n/g, ' <br> ');
 }
 
 function splitSections(text) {

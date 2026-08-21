@@ -1,0 +1,9 @@
+{
+  "title": "Multiline release\n## Injected title",
+  "summary": "Keep the report structure\n- escaped summary item",
+  "files": ["src/index.js\n## Injected files"],
+  "verification": ["npm test\n## Injected evidence"],
+  "artifacts": ["report.txt\n- escaped list item"],
+  "risks": ["Review output\n## Injected risk"],
+  "audience": ["maintainers\n## Injected audience"]
+}
