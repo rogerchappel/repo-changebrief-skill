@@ -16,6 +16,10 @@ node src/cli.js --format json fixtures/change-summary.md
 
 Markdown inputs can include `Summary`, `Changed Files`, `Verification`, `Artifacts`, `Risks`, and `Audience` sections. JSON inputs use the same field names in camel case. `source`, `title`, and `summary` must be strings; `files`, `verification`, `artifacts`, `risks`, and `audience` must be arrays of strings.
 
+JSON strings may contain newlines. Markdown output renders those newlines as
+inline `<br>` breaks so user content cannot introduce report headings or extra
+list items. JSON output preserves the original newline characters.
+
 The input file can appear before or after a single `--format`. Run
 `node src/cli.js --help` for usage. Duplicate `--format` options, unsupported
 formats, unknown options, and extra input files are rejected with a concise
