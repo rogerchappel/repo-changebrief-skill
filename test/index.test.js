@@ -40,6 +40,34 @@ test('renders markdown report', () => {
   assert.match(output, /npm test passed/);
 });
 
+test('keeps multiline values inside the intended markdown fields', () => {
+  const brief = buildBrief(loadSummary('fixtures/multiline-change-summary.json'));
+  const output = renderMarkdown(brief);
+  assert.equal((output.match(/^## /gm) || []).length, 7);
+  assert.doesNotMatch(output, /^## Injected/m);
+  assert.doesNotMatch(output, /^- escaped list item/m);
+  assert.match(output, /^# Multiline release <br> ## Injected title$/m);
+  assert.match(output, /- npm test <br> ## Injected evidence/);
+  assert.match(output, /- report\.txt <br> - escaped list item/);
+  assert.match(output, /- Review output <br> ## Injected risk/);
+});
+
+test('CLI markdown contains only the report headings for multiline JSON', () => {
+  const output = execFileSync(process.execPath, ['src/cli.js', 'fixtures/multiline-change-summary.json', '--format', 'markdown'], { encoding: 'utf8' });
+  assert.equal((output.match(/^## /gm) || []).length, 7);
+  assert.doesNotMatch(output, /^## Injected/m);
+  assert.doesNotMatch(output, /^- escaped list item/m);
+});
+
+test('CLI JSON preserves multiline input semantics', () => {
+  const output = execFileSync(process.execPath, ['src/cli.js', 'fixtures/multiline-change-summary.json', '--format', 'json'], { encoding: 'utf8' });
+  const brief = JSON.parse(output);
+  assert.equal(brief.title, 'Multiline release\n## Injected title');
+  assert.equal(brief.evidence[0], 'npm test\n## Injected evidence');
+  assert.equal(brief.artifacts[0], 'report.txt\n- escaped list item');
+  assert.equal(brief.risks[0], 'Review output\n## Injected risk');
+});
+
 test('classifies change signals as words and supported word forms', () => {
   for (const [title, expected] of [
     ['Add export support', 'feature'],
