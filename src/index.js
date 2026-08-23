@@ -63,7 +63,7 @@ function splitSections(text) {
   for (const line of text.split('\n')) { const h = line.match(/^#{1,4}\s+(.+)$/); if (h) { current = h[1].trim().toLowerCase(); if (!sections.has(current)) sections.set(current, []); } else sections.get(current).push(line); }
   return sections;
 }
-function collect(sections, names) { const out=[]; for (const [name, lines] of sections) if (names.some(n => name.includes(n))) out.push(...items(lines)); return unique(out); }
+function collect(sections, names) { const accepted = new Set(names); const out=[]; for (const [name, lines] of sections) if (accepted.has(name)) out.push(...items(lines)); return unique(out); }
 function items(lines) { return lines.map(l => l.trim()).filter(Boolean).map(l => l.replace(/^[-*]\s+/, '').replace(/^\d+[.)]\s+/, '')).filter(l => l.length > 1); }
 function normalize(input, source) {
   if (!input || typeof input !== 'object' || Array.isArray(input)) {
