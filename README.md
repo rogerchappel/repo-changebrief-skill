@@ -14,7 +14,14 @@ node src/cli.js --format json fixtures/change-summary.md
 
 ## Input Shape
 
-Markdown inputs can include `Summary`, `Changed Files`, `Verification`, `Artifacts`, `Risks`, and `Audience` sections. JSON inputs use the same field names in camel case. `source`, `title`, and `summary` must be strings; `files`, `verification`, `artifacts`, `risks`, and `audience` must be arrays of strings.
+Markdown section headings are matched by their complete, case-insensitive name.
+Accepted names are `Summary`/`Overview`/`Result`, `Files`/`Changed Files`/`Changes`,
+`Verification`/`Tests`/`Checks`, `Artifacts`/`Links`/`Outputs`,
+`Risks`/`Limitations`/`Known Issues`, and `Audience`/`Users`. Embedded words
+do not match, so headings such as `Protests` and `Backlinks` remain unrelated.
+JSON inputs use the corresponding camel-case fields. `source`, `title`, and
+`summary` must be strings; `files`, `verification`, `artifacts`, `risks`, and
+`audience` must be arrays of strings.
 
 JSON strings may contain newlines. Markdown output renders those newlines as
 inline `<br>` breaks so user content cannot introduce report headings or extra
