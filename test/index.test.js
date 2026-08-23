@@ -34,6 +34,49 @@ test('warns when evidence is missing', () => {
   assert.ok(brief.warnings.includes('missing verification evidence'));
 });
 
+test('matches markdown section names without substring collisions', () => {
+  const summary = loadSummary('fixtures/unrelated-headings.md');
+  assert.deepEqual(summary.verification, []);
+  assert.deepEqual(summary.artifacts, []);
+  assert.deepEqual(buildBrief(summary).warnings, [
+    'missing verification evidence',
+    'missing artifact links or file references',
+  ]);
+});
+
+test('accepts every documented markdown section name and alias', () => {
+  const summary = parseSummary(`# Alias coverage
+
+## Overview
+Overview text.
+## Changes
+- src/index.js
+## Checks
+- npm test passed
+## Outputs
+- report.md
+## Known Issues
+- None
+## Users
+- Maintainers`);
+
+  assert.equal(summary.summary, 'Overview text.');
+  assert.deepEqual(summary.files, ['src/index.js']);
+  assert.deepEqual(summary.verification, ['npm test passed']);
+  assert.deepEqual(summary.artifacts, ['report.md']);
+  assert.deepEqual(summary.risks, ['None']);
+  assert.deepEqual(summary.audience, ['Maintainers']);
+});
+
+test('CLI keeps both evidence warnings for unrelated headings', () => {
+  const result = runCli('fixtures/unrelated-headings.md', '--format', 'json');
+  assert.equal(result.status, 0);
+  assert.deepEqual(JSON.parse(result.stdout).warnings, [
+    'missing verification evidence',
+    'missing artifact links or file references',
+  ]);
+});
+
 test('renders markdown report', () => {
   const output = renderMarkdown(buildBrief(loadSummary('fixtures/change-summary.md')));
   assert.match(output, /## Release Notes/);
