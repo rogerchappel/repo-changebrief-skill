@@ -34,6 +34,31 @@ test('warns when evidence is missing', () => {
   assert.ok(brief.warnings.includes('missing verification evidence'));
 });
 
+test('ignores section-like headings inside fenced code blocks', () => {
+  const brief = buildBrief(parseSummary(`# Parser update
+
+## Summary
+Documents a Markdown example.
+
+\`\`\`md
+## Verification
+- not actually evidence
+\`\`\`
+`));
+  assert.deepEqual(brief.evidence, []);
+  assert.ok(brief.warnings.includes('missing verification evidence'));
+});
+
+test('accepts optional closing markers on ATX section headings', () => {
+  const brief = buildBrief(parseSummary(`# Parser update
+
+## Verification ##
+- npm test passes
+`));
+  assert.deepEqual(brief.evidence, ['npm test passes']);
+  assert.ok(!brief.warnings.includes('missing verification evidence'));
+});
+
 test('matches markdown section names without substring collisions', () => {
   const summary = loadSummary('fixtures/unrelated-headings.md');
   assert.deepEqual(summary.verification, []);
