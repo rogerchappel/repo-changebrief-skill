@@ -60,8 +60,30 @@ function markdownInline(value) {
 
 function splitSections(text) {
   const sections = new Map([['body', []]]); let current = 'body';
-  for (const line of text.split('\n')) { const h = line.match(/^#{1,4}\s+(.+)$/); if (h) { current = h[1].trim().toLowerCase(); if (!sections.has(current)) sections.set(current, []); } else sections.get(current).push(line); }
+  let fence = null;
+  for (const line of text.split('\n')) {
+    if (fence) {
+      if (isFenceClose(line, fence)) fence = null;
+      sections.get(current).push(line);
+      continue;
+    }
+    const openingFence = line.match(/^ {0,3}(`{3,}|~{3,})/);
+    if (openingFence) {
+      fence = { marker: openingFence[1][0], length: openingFence[1].length };
+      sections.get(current).push(line);
+      continue;
+    }
+    const h = line.match(/^ {0,3}#{1,6}(?:[ \t]+|$)(.*)$/);
+    if (h) {
+      current = h[1].replace(/[ \t]+#+[ \t]*$/, '').trim().toLowerCase();
+      if (!sections.has(current)) sections.set(current, []);
+    } else sections.get(current).push(line);
+  }
   return sections;
+}
+function isFenceClose(line, fence) {
+  const match = line.match(/^ {0,3}(`{3,}|~{3,})[ \t]*$/);
+  return Boolean(match && match[1][0] === fence.marker && match[1].length >= fence.length);
 }
 function collect(sections, names) { const accepted = new Set(names); const out=[]; for (const [name, lines] of sections) if (accepted.has(name)) out.push(...items(lines)); return unique(out); }
 function items(lines) { return lines.map(l => l.trim()).filter(Boolean).map(l => l.replace(/^[-*]\s+/, '').replace(/^\d+[.)]\s+/, '')).filter(l => l.length > 1); }
