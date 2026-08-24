@@ -15,6 +15,9 @@ node src/cli.js --format json fixtures/change-summary.md
 ## Input Shape
 
 Markdown section headings are matched by their complete, case-insensitive name.
+CommonMark ATX headings from `#` through `######` are supported, including
+optional closing `#` markers. ATX-looking lines inside backtick or tilde fenced
+code blocks remain example content and do not create or end sections.
 Accepted names are `Summary`/`Overview`/`Result`, `Files`/`Changed Files`/`Changes`,
 `Verification`/`Tests`/`Checks`, `Artifacts`/`Links`/`Outputs`,
 `Risks`/`Limitations`/`Known Issues`, and `Audience`/`Users`. Embedded words
