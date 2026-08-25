@@ -49,6 +49,36 @@ Documents a Markdown example.
   assert.ok(brief.warnings.includes('missing verification evidence'));
 });
 
+test('ignores backtick-fenced headings and prose when deriving title and fallback summary', () => {
+  const summary = parseSummary(`\`\`\`md
+# Internal Example
+example prose
+\`\`\`
+
+# Real Change
+
+Actual summary paragraph.
+`);
+
+  assert.equal(summary.title, 'Real Change');
+  assert.equal(summary.summary, 'Actual summary paragraph.');
+});
+
+test('ignores tilde-fenced headings and prose when deriving title and fallback summary', () => {
+  const summary = parseSummary(`~~~~markdown
+# Internal Example
+example prose
+~~~~
+
+# Real Change
+
+Actual summary paragraph.
+`);
+
+  assert.equal(summary.title, 'Real Change');
+  assert.equal(summary.summary, 'Actual summary paragraph.');
+});
+
 test('accepts optional closing markers on ATX section headings', () => {
   const brief = buildBrief(parseSummary(`# Parser update
 
