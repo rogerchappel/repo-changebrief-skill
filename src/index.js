@@ -16,16 +16,16 @@ export function parseSummary(text, source = 'inline') {
   const body = String(text || '').replace(/\r\n/g, '\n');
   if (!body.trim()) throw new Error('change summary is empty');
   if (source.endsWith('.json')) return normalize(JSON.parse(body), source);
-  const sections = splitSections(body);
+  const markdown = scanMarkdown(body);
   return normalize({
     source,
-    title: firstHeading(body) || basename(source),
-    summary: collect(sections, ['summary', 'overview', 'result']).join(' ') || firstParagraph(body),
-    files: collect(sections, ['files', 'changed files', 'changes']).filter(looksLikeFile),
-    verification: collect(sections, ['verification', 'tests', 'checks']),
-    artifacts: collect(sections, ['artifacts', 'links', 'outputs']),
-    risks: collect(sections, ['risks', 'limitations', 'known issues']),
-    audience: collect(sections, ['audience', 'users'])
+    title: markdown.title || basename(source),
+    summary: collect(markdown.sections, ['summary', 'overview', 'result']).join(' ') || firstParagraph(markdown.prose),
+    files: collect(markdown.sections, ['files', 'changed files', 'changes']).filter(looksLikeFile),
+    verification: collect(markdown.sections, ['verification', 'tests', 'checks']),
+    artifacts: collect(markdown.sections, ['artifacts', 'links', 'outputs']),
+    risks: collect(markdown.sections, ['risks', 'limitations', 'known issues']),
+    audience: collect(markdown.sections, ['audience', 'users'])
   }, source);
 }
 
@@ -58,28 +58,33 @@ function markdownInline(value) {
   return String(value).replace(/\r\n?|\n/g, ' <br> ');
 }
 
-function splitSections(text) {
+function scanMarkdown(text) {
   const sections = new Map([['body', []]]); let current = 'body';
+  const prose = [];
+  let title = '';
   let fence = null;
   for (const line of text.split('\n')) {
     if (fence) {
       if (isFenceClose(line, fence)) fence = null;
-      sections.get(current).push(line);
       continue;
     }
     const openingFence = line.match(/^ {0,3}(`{3,}|~{3,})/);
     if (openingFence) {
       fence = { marker: openingFence[1][0], length: openingFence[1].length };
-      sections.get(current).push(line);
       continue;
     }
     const h = line.match(/^ {0,3}#{1,6}(?:[ \t]+|$)(.*)$/);
     if (h) {
-      current = h[1].replace(/[ \t]+#+[ \t]*$/, '').trim().toLowerCase();
+      const heading = h[1].replace(/[ \t]+#+[ \t]*$/, '').trim();
+      if (!title && /^ {0,3}#(?:[ \t]+|$)/.test(line)) title = heading;
+      current = heading.toLowerCase();
       if (!sections.has(current)) sections.set(current, []);
-    } else sections.get(current).push(line);
+    } else {
+      sections.get(current).push(line);
+      prose.push(line);
+    }
   }
-  return sections;
+  return { sections, title, prose };
 }
 function isFenceClose(line, fence) {
   const match = line.match(/^ {0,3}(`{3,}|~{3,})[ \t]*$/);
@@ -105,8 +110,7 @@ function normalize(input, source) {
 }
 function looksLikeFile(line) { return /[\w.-]+\/[\w./-]+|[\w.-]+\.(js|ts|md|json|yml|yaml|py|sh)$/i.test(line); }
 function unique(items) { return [...new Set(items.map(String).map(s => s.trim()).filter(Boolean))]; }
-function firstHeading(text) { return text.match(/^#\s+(.+)$/m)?.[1]?.trim(); }
-function firstParagraph(text) { return text.split('\n').map(l => l.trim()).find(l => l && !l.startsWith('#') && !l.startsWith('-')) || ''; }
+function firstParagraph(lines) { return lines.map(l => l.trim()).find(l => l && !l.startsWith('-')) || ''; }
 function basename(path) { return path.split('/').pop()?.replace(/\.[^.]+$/, '') || 'change-summary'; }
 function lead(summary, type) { return `${type} update: ${summary.summary || summary.title}`; }
 function evidenceLine(summary) { return summary.verification.length ? `Cite verification: ${summary.verification[0]}` : 'Call out verification as pending before public use.'; }
